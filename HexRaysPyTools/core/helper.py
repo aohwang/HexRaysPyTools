@@ -1,3 +1,4 @@
+from __future__ import print_function
 import collections
 import logging
 
@@ -124,7 +125,7 @@ def get_func_argument_info(function, expression):
             if idx < func_tinfo.get_nargs():
                 return idx, func_tinfo.get_nth_arg(idx)
             return idx, None
-    print "[ERROR] Wrong usage of 'Helper.get_func_argument_info()'"
+    print("[ERROR] Wrong usage of 'Helper.get_func_argument_info()'")
 
 
 def set_func_argument(func_tinfo, index, arg_tinfo):
@@ -265,7 +266,7 @@ def get_funcs_calling_address(ea):
         if xref_func_ea != idaapi.BADADDR:
             xrefs.add(xref_func_ea)
         else:
-            print "[Warning] Function not found at 0x{0:08X}".format(xref_ea)
+            print("[Warning] Function not found at 0x{0:08X}".format(xref_ea))
         xref_ea = idaapi.get_next_cref_to(ea, xref_ea)
     return xrefs
 

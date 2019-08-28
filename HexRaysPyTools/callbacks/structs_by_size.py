@@ -1,3 +1,4 @@
+from __future__ import print_function
 import idaapi
 
 import actions
@@ -61,11 +62,11 @@ class GetStructureBySize(actions.HexRaysPopupAction):
 
             c_function = hx_view.cfunc
             number_formats = c_function.numforms    # type: idaapi.user_numforms_t
-            # print "(number) flags: {0:#010X}, type_name: {1}, opnum: {2}".format(
+            # print("(number) flags: {0:#010X}, type_name: {1}, opnum: {2}".format(
             #     number_format.flags,
             #     number_format.type_name,
             #     number_format.opnum
-            # )
+            # ))
             operand_locator = idaapi.operand_locator_t(ea, ord(operand_number) if operand_number else 0)
             if operand_locator in number_formats:
                 del number_formats[operand_locator]

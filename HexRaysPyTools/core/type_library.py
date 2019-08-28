@@ -1,3 +1,4 @@
+from __future__ import print_function
 import ctypes
 import sys
 
@@ -27,7 +28,7 @@ def _enable_library_ordinals(library_num):
     elif sys.platform == "darwin":
         dll = ctypes.cdll["lib" + idaname + ".dylib"]
     else:
-        print "[ERROR] Failed to enable ordinals"
+        print("[ERROR] Failed to enable ordinals")
         return
 
     dll.get_idati.restype = ctypes.POINTER(til_t)
@@ -58,7 +59,7 @@ def choose_til():
         if max_ordinal == idaapi.BADORD:
             _enable_library_ordinals(library_num - 1)
             max_ordinal = idaapi.get_ordinal_qty(selected_library)
-        print "[DEBUG] Maximal ordinal of lib {0} = {1}".format(selected_library.name, max_ordinal)
+        print("[DEBUG] Maximal ordinal of lib {0} = {1}".format(selected_library.name, max_ordinal))
         return selected_library, max_ordinal, library_num == 0
 
 

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import re
 import logging
 import idaapi
@@ -108,13 +109,13 @@ class NegativeLocalCandidate:
         parent_tinfo = idaapi.tinfo_t()
         target_tinfo = idaapi.tinfo_t()
         if not target_tinfo.get_named_type(type_library, self.tinfo.dstr()):
-            print "[Warning] Such type doesn't exist in '{0}' library".format(type_library.name)
+            print("[Warning] Such type doesn't exist in '{0}' library".format(type_library.name))
             return result
         for ordinal in xrange(1, idaapi.get_ordinal_qty(type_library)):
             parent_tinfo.create_typedef(type_library, ordinal)
             if parent_tinfo.get_size() >= min_struct_size:
                 for offset, name in find_deep_members(parent_tinfo, target_tinfo):
-                    # print "[DEBUG] Found {0} at {1} in {2}".format(name, offset, parent_tinfo.dstr())
+                    # print("[DEBUG] Found {0} at {1} in {2}".format(name, offset, parent_tinfo.dstr()))
                     if offset + min_offset >= 0 and offset + max_offset <= parent_tinfo.get_size():
                         result.append((ordinal, offset, name, parent_tinfo.dstr()))
         return result

@@ -1,10 +1,10 @@
 from __future__ import print_function
 import idaapi
+from six.moves import *
 
-import actions
+from . import actions
 import HexRaysPyTools.forms as forms
 import HexRaysPyTools.core.type_library as type_library
-
 
 def _choose_structure_by_size(size):
     result = type_library.choose_til()
@@ -12,7 +12,7 @@ def _choose_structure_by_size(size):
         selected_library, max_ordinal, is_local_type = result
         matched_types = []
         tinfo = idaapi.tinfo_t()
-        for ordinal in xrange(1, max_ordinal):
+        for ordinal in range(1, max_ordinal):
             tinfo.create_typedef(selected_library, ordinal)
             if tinfo.get_size() == size:
                 name = tinfo.dstr()

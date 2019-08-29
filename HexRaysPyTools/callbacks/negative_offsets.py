@@ -2,16 +2,16 @@ from __future__ import print_function
 import re
 import logging
 import idaapi
+from six.moves import *
 
-import actions
-import callbacks
+from . import actions
+from . import callbacks
 import HexRaysPyTools.core.helper as helper
 import HexRaysPyTools.core.type_library as type_library
 import HexRaysPyTools.forms as forms
 
 logger = logging.getLogger(__name__)
 potential_negatives = {}
-
 
 def _has_magic_comment(lvar):
     # type: (idaapi.lvar_t) -> bool
@@ -39,11 +39,11 @@ def find_deep_members(parent_tinfo, target_tinfo):
     result = []
     for udt_member in udt_data:
         if udt_member.type.equals_to(target_tinfo):
-            result.append((udt_member.offset / 8, udt_member.name))
+            result.append((udt_member.offset // 8, udt_member.name))
         elif udt_member.type.is_udt():
             for offset, name in find_deep_members(udt_member.type, target_tinfo):
                 final_name = udt_member.name + '.' + name if udt_member.name else name
-                result.append((udt_member.offset / 8 + offset, final_name))
+                result.append((udt_member.offset // 8 + offset, final_name))
     return result
 
 
@@ -85,7 +85,7 @@ class NegativeLocalCandidate:
         udt_member.offset = offset * 8
         if offset >= 0 and tinfo.find_udt_member(idaapi.STRMEM_OFFSET, udt_member) != -1:
             if udt_member.type.is_udt():
-                return self.is_structure_offset(udt_member.type, offset - udt_member.offset / 8)
+                return self.is_structure_offset(udt_member.type, offset - udt_member.offset // 8)
             return udt_member.offset == offset * 8
         return False
 
@@ -111,7 +111,7 @@ class NegativeLocalCandidate:
         if not target_tinfo.get_named_type(type_library, self.tinfo.dstr()):
             print("[Warning] Such type doesn't exist in '{0}' library".format(type_library.name))
             return result
-        for ordinal in xrange(1, idaapi.get_ordinal_qty(type_library)):
+        for ordinal in range(1, idaapi.get_ordinal_qty(type_library)):
             parent_tinfo.create_typedef(type_library, ordinal)
             if parent_tinfo.get_size() >= min_struct_size:
                 for offset, name in find_deep_members(parent_tinfo, target_tinfo):
@@ -231,7 +231,7 @@ class SearchVisitor(idaapi.ctree_parentee_t):
                             self.result[idx] = NegativeLocalInfo(
                                 tinfo,
                                 parent_tinfo,
-                                udt_member[0].offset / 8,
+                                udt_member[0].offset // 8,
                                 member_name
                             )
                             return 1
@@ -284,7 +284,7 @@ class PotentialNegativeCollector(callbacks.HexRaysEventHandler):
 
             # Second get saved information from comments
             lvars = cfunc.get_lvars()
-            for idx in xrange(len(lvars)):
+            for idx in range(len(lvars)):
                 result = _parse_magic_comment(lvars[idx])
                 if result and result.tinfo.equals_to(lvars[idx].type().get_pointed_object()):
                     negative_lvars[idx] = result
@@ -361,7 +361,7 @@ class SelectContainingStructure(actions.HexRaysPopupAction):
         lvar_idx = hx_view.item.e.v.idx
         candidate = potential_negatives[lvar_idx]
         structures = candidate.find_containing_structures(selected_library)
-        items = map(lambda x: [str(x[0]), "0x{0:08X}".format(x[1]), x[2], x[3]], structures)
+        items = list(map(lambda x: [str(x[0]), "0x{0:08X}".format(x[1]), x[2], x[3]], structures))
         structure_chooser = forms.MyChoose(
             items,
             "Select Containing Structure",

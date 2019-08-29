@@ -3,7 +3,7 @@ import time
 
 import idaapi
 
-import callbacks
+from . import callbacks
 import HexRaysPyTools.core.struct_xrefs as struct_xrefs
 import HexRaysPyTools.core.helper as helper
 

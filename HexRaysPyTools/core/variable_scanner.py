@@ -1,9 +1,10 @@
 import logging
 import idaapi
 import idc
-import const
-import helper
-import temporary_structure
+from six.moves import *
+from . import const
+from . import helper
+from . import temporary_structure
 import HexRaysPyTools.api as api
 
 logger = logging.getLogger(__name__)

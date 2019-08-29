@@ -1,4 +1,5 @@
 from __future__ import print_function
+from six.moves import *
 import collections
 import logging
 
@@ -12,7 +13,6 @@ import HexRaysPyTools.forms as forms
 
 
 logger = logging.getLogger(__name__)
-
 
 def is_imported_ea(ea):
     if idc.get_segm_name(ea) == ".plt":
@@ -207,10 +207,10 @@ def get_fields_at_offset(tinfo, offset):
                 elif not udt_member.type.is_udt():
                     result.append(udt_member.type)
             if udt_member.type.is_array():
-                if (offset - udt_member.offset / 8) % udt_member.type.get_array_element().get_size() == 0:
+                if (offset - udt_member.offset // 8) % udt_member.type.get_array_element().get_size() == 0:
                     result.append(udt_member.type.get_array_element())
             elif udt_member.type.is_udt():
-                result.extend(get_fields_at_offset(udt_member.type, offset - udt_member.offset / 8))
+                result.extend(get_fields_at_offset(udt_member.type, offset - udt_member.offset // 8))
             idx += 1
     return result
 
@@ -327,7 +327,7 @@ def save_long_str_to_idb(array_name, value):
         idc.delete_array(id)
     id = idc.create_array(array_name)
     r = []
-    for idx in xrange(len(value) / 1024 + 1):
+    for idx in xrange(len(value) // 1024 + 1):
         s = value[idx * 1024: (idx + 1) * 1024]
         r.append(s)
         idc.set_array_string(id, idx, s)

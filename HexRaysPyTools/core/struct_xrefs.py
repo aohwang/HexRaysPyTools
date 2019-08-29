@@ -3,7 +3,7 @@ import json
 import logging
 
 import idaapi
-import helper
+from . import helper
 import HexRaysPyTools.settings as settings
 
 logger = logging.getLogger(__name__)

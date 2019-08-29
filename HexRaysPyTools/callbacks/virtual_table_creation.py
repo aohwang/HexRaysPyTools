@@ -1,6 +1,6 @@
 import idaapi
 
-import actions
+from . import actions
 from HexRaysPyTools.core.temporary_structure import VirtualTable
 
 

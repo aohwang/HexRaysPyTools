@@ -1,18 +1,17 @@
 from __future__ import print_function
 import bisect
 import itertools
+from six.moves import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import idaapi
 import idc
 
-import common
-import const
-import helper
-import variable_scanner
+from . import common
+from . import const
+from . import helper
 import HexRaysPyTools.api as api
 from HexRaysPyTools.forms import MyChoose
-
 
 SCORE_TABLE = dict((v, k) for k, v in enumerate(
     ['unsigned __int8 *', 'unsigned __int8', '__int8 *', '__int8', '_BYTE', '_BYTE *', '_BYTE **', 'const char **',
@@ -306,6 +305,7 @@ class VirtualTable(AbstractMember):
         if function.arguments and function.arguments[0].is_arg_var and helper.is_legal_type(function.arguments[0].tif):
             print("[Info] Scanning virtual function at 0x{0:08X}".format(function.entry_ea))
             obj = api.VariableObject(function.get_lvars()[0], 0)
+            from . import variable_scanner
             scanner = variable_scanner.NewDeepSearchVisitor(function, self.offset, obj, temp_struct)
             scanner.process()
         else:
@@ -640,7 +640,7 @@ class TemporaryStructureModel(QtCore.QAbstractTableModel):
     def calculate_array_size(self, row):
         next_row = self.get_next_enabled(row)
         if next_row:
-            return (self.items[next_row].offset - self.items[row].offset) / self.items[row].size
+            return (self.items[next_row].offset - self.items[row].offset) // self.items[row].size
         return 0
 
     def get_recognized_shape(self, start=0, stop=-1):
@@ -741,7 +741,7 @@ class TemporaryStructureModel(QtCore.QAbstractTableModel):
             udt_data = idaapi.udt_type_data_t()
             if item.tinfo.get_udt_details(udt_data):
                 for udt_item in udt_data:
-                    member = Member(offset + udt_item.offset / 8, udt_item.type, None)
+                    member = Member(offset + udt_item.offset // 8, udt_item.type, None)
                     member.name = udt_item.name
                     self.add_row(member)
 

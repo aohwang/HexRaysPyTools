@@ -1,7 +1,7 @@
 from __future__ import print_function
 from collections import namedtuple
 import idaapi
-import actions
+from . import actions
 import HexRaysPyTools.core.helper as helper
 
 

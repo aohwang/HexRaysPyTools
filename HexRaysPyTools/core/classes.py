@@ -1,11 +1,12 @@
 from __future__ import print_function
+from six import iteritems, itervalues
+from six.moves import *
 from PyQt5 import QtCore, QtGui
 
 import idaapi
 
 import HexRaysPyTools.forms
-import helper
-
+from . import helper
 
 all_virtual_functions = {}      # name    -> VirtualMethod
 all_virtual_tables = {}         # ordinal -> VirtualTable
@@ -302,10 +303,10 @@ class Class(object):
                             if not possible_func_udt.type.is_funcptr():
                                 break
                         else:
-                            vtables[field_udt.offset / 8] = possible_vtable
+                            vtables[field_udt.offset // 8] = possible_vtable
         if vtables:
             class_ = Class(tinfo.dstr(), tinfo, ordinal)
-            for offset, vtable_tinfo in vtables.iteritems():
+            for offset, vtable_tinfo in iteritems(vtables):
                 vtables[offset] = VirtualTable.create(vtable_tinfo, class_)
             class_.vtables = vtables
             return class_
@@ -317,7 +318,7 @@ class Class(object):
                 if class_:
                     self.name = class_.name
                     self.modified = False
-                    for offset, vtable in class_.vtables.iteritems():
+                    for offset, vtable in iteritems(class_.vtables):
                         self.vtables[offset].update()
                 else:
                     # TODO: drop class
@@ -432,7 +433,7 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         for class_row, class_ in enumerate(classes):
             class_item = TreeItem(class_, class_row, None)
-            for vtable_row, vtable in class_.vtables.iteritems():
+            for vtable_row, vtable in iteritems(class_.vtables):
                 vtable_item = TreeItem(vtable, vtable_row, class_item)
                 vtable_item.children = [TreeItem(function, 0, vtable_item) for function in vtable.virtual_functions]
                 class_item.children.append(vtable_item)

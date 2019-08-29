@@ -1,6 +1,6 @@
 from __future__ import print_function
+from six.moves import configparser
 import os
-import ConfigParser
 import idc
 
 import logging
@@ -46,7 +46,7 @@ def add_default_settings(config):
 def load_settings():
     global DEBUG_MESSAGE_LEVEL, PROPAGATE_THROUGH_ALL_NAMES, STORE_XREFS, SCAN_ANY_TYPE
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     if os.path.isfile(CONFIG_FILE_PATH):
         config.read(CONFIG_FILE_PATH)
 

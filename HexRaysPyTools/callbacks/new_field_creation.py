@@ -4,7 +4,7 @@ import re
 import idaapi
 import idc
 
-import actions
+from . import actions
 import HexRaysPyTools.core.helper as helper
 import HexRaysPyTools.core.const as const
 

@@ -1,11 +1,12 @@
 from __future__ import print_function
 import collections
+from six.moves import *
 
 import idaapi
 import idautils
 import idc
 
-import common
+from . import common
 
 # All virtual addresses where imported by module function pointers are stored
 imported_ea = set()
@@ -34,7 +35,7 @@ def _init_imported_ea():
     imported_ea.clear()
     nimps = idaapi.get_import_module_qty()
 
-    for i in xrange(0, nimps):
+    for i in range(0, nimps):
         name = idaapi.get_import_module_name(i)
         if not name:
             print("[Warning] Failed to get import module name for #%d" % i)

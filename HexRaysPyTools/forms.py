@@ -1,3 +1,4 @@
+from six.moves import *
 from PyQt5 import QtCore, QtWidgets
 
 import idaapi
@@ -199,7 +200,7 @@ class ClassViewer(idaapi.PluginForm):
         self.action_expand.triggered.connect(self.class_tree.expandAll)
         self.action_set_arg.triggered.connect(
             lambda: self.class_model.set_first_argument_type(
-                map(self.proxy_model.mapToSource, self.class_tree.selectedIndexes())
+                list(map(self.proxy_model.mapToSource, self.class_tree.selectedIndexes()))
             )
         )
         self.action_rollback.triggered.connect(lambda: self.class_model.rollback())
@@ -234,10 +235,10 @@ class ClassViewer(idaapi.PluginForm):
 
     def show_menu(self, point):
         self.action_set_arg.setEnabled(True)
-        indexes = map(
+        indexes = list(map(
             self.proxy_model.mapToSource,
             filter(lambda x: x.column() == 0, self.class_tree.selectedIndexes())
-        )
+        ))
         if len(indexes) > 1:
             if filter(lambda x: len(x.internalPointer().children) > 0, indexes):
                 self.action_set_arg.setEnabled(False)

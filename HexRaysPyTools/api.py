@@ -1,8 +1,8 @@
 import logging
 import idaapi
 import idc
-from core.helper import to_hex
-import core.helper as helper
+from .core.helper import to_hex
+from .core import helper as helper
 
 logger = logging.getLogger(__name__)
 

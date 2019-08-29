@@ -1,6 +1,6 @@
 import idaapi
 
-import actions
+from . import actions
 import HexRaysPyTools.core.cache as cache
 import HexRaysPyTools.core.classes as classes
 from HexRaysPyTools.core.structure_graph import StructureGraph

@@ -1,6 +1,7 @@
+from __future__ import print_function
 from collections import namedtuple
 import idaapi
-import actions
+from . import actions
 import HexRaysPyTools.core.helper as helper
 
 
@@ -188,9 +189,9 @@ class RecastItemLeft(actions.HexRaysPopupAction):
             udt_member.offset = ri.field_offset * 8
             idx = tinfo.find_udt_member(idaapi.STRMEM_OFFSET, udt_member)
             if udt_member.offset != ri.field_offset * 8:
-                print "[Info] Can't handle with arrays yet"
+                print("[Info] Can't handle with arrays yet")
             elif udt_member.type.get_size() != ri.recast_tinfo.get_size():
-                print "[Info] Can't recast different sizes yet"
+                print("[Info] Can't recast different sizes yet")
             else:
                 udt_data = idaapi.udt_type_data_t()
                 tinfo.get_udt_details(udt_data)

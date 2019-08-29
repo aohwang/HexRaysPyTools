@@ -1,17 +1,17 @@
+from __future__ import print_function
 import bisect
 import itertools
+from six.moves import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import idaapi
 import idc
 
-import common
-import const
-import helper
-import variable_scanner
+from . import common
+from . import const
+from . import helper
 import HexRaysPyTools.api as api
 from HexRaysPyTools.forms import MyChoose
-
 
 SCORE_TABLE = dict((v, k) for k, v in enumerate(
     ['unsigned __int8 *', 'unsigned __int8', '__int8 *', '__int8', '_BYTE', '_BYTE *', '_BYTE **', 'const char **',
@@ -30,7 +30,7 @@ def parse_vtable_name(address):
             return "Vtable" + name[3:], False
         elif "table" in name:
             return name, True
-        print "[Warning] Weird virtual table name -", name
+        print("[Warning] Weird virtual table name -", name)
         return "Vtable_" + name, False
     name = idc.demangle_name(idaapi.get_name(address), idc.get_inf_attr(idc.INF_SHORT_DN))
     assert name, "Virtual table must have either legal c-type name or mangled name"
@@ -124,7 +124,7 @@ class VirtualFunction:
         self.visited = False
 
     def get_ptr_tinfo(self):
-        # print self.tinfo.dstr()
+        # print(self.tinfo.dstr())
         ptr_tinfo = idaapi.tinfo_t()
         ptr_tinfo.create_ptr(self.tinfo)
         return ptr_tinfo
@@ -157,7 +157,7 @@ class VirtualFunction:
             return const.DUMMY_FUNC
         except idaapi.DecompilationFailure:
             pass
-        print "[ERROR] Failed to decompile function at 0x{0:08X}".format(self.address)
+        print("[ERROR] Failed to decompile function at 0x{0:08X}".format(self.address))
         return const.DUMMY_FUNC
 
     def show_location(self):
@@ -170,7 +170,7 @@ class ImportedVirtualFunction(VirtualFunction):
 
     @property
     def tinfo(self):
-        print "[INFO] Ignoring import function at 0x{0:08X}".format(self.address)
+        print("[INFO] Ignoring import function at 0x{0:08X}".format(self.address))
         tinfo = idaapi.tinfo_t()
         if idaapi.guess_tinfo2(self.address, tinfo):
             return tinfo
@@ -232,14 +232,14 @@ class VirtualTable(AbstractMember):
                 break
 
     def create_tinfo(self):
-        # print "(Virtual table) at address: 0x{0:08X} name: {1}".format(self.address, self.name)
+        # print("(Virtual table) at address: 0x{0:08X} name: {1}".format(self.address, self.name))
         udt_data = idaapi.udt_type_data_t()
         for function in self.virtual_functions:
             udt_data.push_back(function.get_udt_member())
 
         for duplicates in helper.search_duplicate_fields(udt_data):
             first_entry_idx = duplicates.pop(0)
-            print "[Warning] Found duplicate virtual functions", udt_data[first_entry_idx].name
+            print("[Warning] Found duplicate virtual functions", udt_data[first_entry_idx].name)
             for num, dup in enumerate(duplicates):
                 udt_data[dup].name = "duplicate_{0}_{1}".format(first_entry_idx, num + 1)
                 tinfo = idaapi.tinfo_t()
@@ -248,10 +248,10 @@ class VirtualTable(AbstractMember):
 
         final_tinfo = idaapi.tinfo_t()
         if final_tinfo.create_udt(udt_data, idaapi.BTF_STRUCT):
-            # print "\n\t(Final structure)\n" + idaapi.print_tinfo('\t', 4, 5, idaapi.PRTYPE_MULTI | idaapi.PRTYPE_TYPE
-            #                                                      | idaapi.PRTYPE_SEMI, final_tinfo, self.name, None)
+            # print("\n\t(Final structure)\n" + idaapi.print_tinfo('\t', 4, 5, idaapi.PRTYPE_MULTI | idaapi.PRTYPE_TYPE
+            #                                                      | idaapi.PRTYPE_SEMI, final_tinfo, self.name, None))
             return final_tinfo
-        print "[ERROR] Virtual table creation failed"
+        print("[ERROR] Virtual table creation failed")
 
     def import_to_structures(self, ask=False):
         """
@@ -273,13 +273,13 @@ class VirtualTable(AbstractMember):
             ordinal = idaapi.idc_set_local_type(-1, cdecl_typedef, idaapi.PT_TYP)
 
         if ordinal:
-            print "[Info] Virtual table " + self.vtable_name + " added to Local Types"
+            print("[Info] Virtual table " + self.vtable_name + " added to Local Types")
             return idaapi.import_type(idaapi.cvar.idati, -1, self.vtable_name)
         else:
-            print "[Error] Failed to create virtual table " + self.vtable_name
-            print "*" * 100
-            print cdecl_typedef
-            print "*" * 100
+            print("[Error] Failed to create virtual table " + self.vtable_name)
+            print("*" * 100)
+            print(cdecl_typedef)
+            print("*" * 100)
 
     def show_virtual_functions(self, temp_struct):
         function_chooser = self.VirtualTableChoose(
@@ -293,22 +293,23 @@ class VirtualTable(AbstractMember):
 
     def scan_virtual_function(self, index, temp_struct):
         if helper.is_imported_ea(self.virtual_functions[index].address):
-            print "[INFO] Ignoring import function at 0x{0:08X}".format(self.address)
+            print("[INFO] Ignoring import function at 0x{0:08X}".format(self.address))
             return
         try:
             function = idaapi.decompile(self.virtual_functions[index].address)
         except idaapi.DecompilationFailure:
-            print "[ERROR] Failed to decompile function at 0x{0:08X}".format(self.address)
+            print("[ERROR] Failed to decompile function at 0x{0:08X}".format(self.address))
             return
         if helper.FunctionTouchVisitor(function).process():
             function = idaapi.decompile(self.virtual_functions[index].address)
         if function.arguments and function.arguments[0].is_arg_var and helper.is_legal_type(function.arguments[0].tif):
-            print "[Info] Scanning virtual function at 0x{0:08X}".format(function.entry_ea)
+            print("[Info] Scanning virtual function at 0x{0:08X}".format(function.entry_ea))
             obj = api.VariableObject(function.get_lvars()[0], 0)
+            from . import variable_scanner
             scanner = variable_scanner.NewDeepSearchVisitor(function, self.offset, obj, temp_struct)
             scanner.process()
         else:
-            print "[Warning] Bad type of first argument in virtual function at 0x{0:08X}".format(function.entry_ea)
+            print("[Warning] Bad type of first argument in virtual function at 0x{0:08X}".format(function.entry_ea))
 
     def scan_virtual_functions(self, temp_struct):
         for idx in xrange(len(self.virtual_functions)):
@@ -352,7 +353,7 @@ class VirtualTable(AbstractMember):
         functions_count = 0
         while True:
             func_address = helper.get_ptr(address)
-            # print "[INFO] Address 0x{0:08X}".format(func_address)
+            # print("[INFO] Address 0x{0:08X}".format(func_address))
             if helper.is_code_ea(func_address) or helper.is_imported_ea(func_address):
                 functions_count += 1
                 address += const.EA_SIZE
@@ -523,14 +524,14 @@ class TemporaryStructureModel(QtCore.QAbstractTableModel):
         for field in self.items:
             if isinstance(field, VirtualTable) and field.have_nice_name:
                 if candidate_name:
-                    print "[WARNING] Structure has 2 or more virtual tables. It's name set to default"
+                    print("[WARNING] Structure has 2 or more virtual tables. It's name set to default")
                     return self.default_name
                 candidate_name = field.vtable_name.replace("_vtbl", "")
         return candidate_name if candidate_name else self.default_name
 
     def pack(self, start=0, stop=None):
         if self.collisions[start:stop].count(True):
-            print "[Warning] Collisions detected"
+            print("[Warning] Collisions detected")
             return
 
         final_tinfo = idaapi.tinfo_t()
@@ -575,7 +576,7 @@ class TemporaryStructureModel(QtCore.QAbstractTableModel):
             else:
                 ordinal = idaapi.idc_set_local_type(-1, cdecl, idaapi.PT_TYP)
             if ordinal:
-                print "[Info] New type {0} was added to Local Types".format(structure_name)
+                print("[Info] New type {0} was added to Local Types".format(structure_name))
                 tid = idaapi.import_type(idaapi.cvar.idati, -1, structure_name)
                 if tid:
                     tinfo = idaapi.create_typedef(structure_name)
@@ -585,7 +586,7 @@ class TemporaryStructureModel(QtCore.QAbstractTableModel):
                         scanned_var.apply_type(ptr_tinfo)
                     return tinfo
             else:
-                print "[ERROR] Structure {0} probably already exist".format(structure_name)
+                print("[ERROR] Structure {0} probably already exist".format(structure_name))
 
     def have_member(self, member):
         if self.items:
@@ -639,7 +640,7 @@ class TemporaryStructureModel(QtCore.QAbstractTableModel):
     def calculate_array_size(self, row):
         next_row = self.get_next_enabled(row)
         if next_row:
-            return (self.items[next_row].offset - self.items[row].offset) / self.items[row].size
+            return (self.items[next_row].offset - self.items[row].offset) // self.items[row].size
         return 0
 
     def get_recognized_shape(self, start=0, stop=-1):
@@ -740,7 +741,7 @@ class TemporaryStructureModel(QtCore.QAbstractTableModel):
             udt_data = idaapi.udt_type_data_t()
             if item.tinfo.get_udt_details(udt_data):
                 for udt_item in udt_data:
-                    member = Member(offset + udt_item.offset / 8, udt_item.type, None)
+                    member = Member(offset + udt_item.offset // 8, udt_item.type, None)
                     member.name = udt_item.name
                     self.add_row(member)
 

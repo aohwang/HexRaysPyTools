@@ -1,5 +1,6 @@
+from six.moves import *
 import idaapi
-import actions
+from . import actions
 import HexRaysPyTools.core.const as const
 
 

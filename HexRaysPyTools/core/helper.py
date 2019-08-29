@@ -1,3 +1,5 @@
+from __future__ import print_function
+from six.moves import *
 import collections
 import logging
 
@@ -11,7 +13,6 @@ import HexRaysPyTools.forms as forms
 
 
 logger = logging.getLogger(__name__)
-
 
 def is_imported_ea(ea):
     if idc.get_segm_name(ea) == ".plt":
@@ -124,7 +125,7 @@ def get_func_argument_info(function, expression):
             if idx < func_tinfo.get_nargs():
                 return idx, func_tinfo.get_nth_arg(idx)
             return idx, None
-    print "[ERROR] Wrong usage of 'Helper.get_func_argument_info()'"
+    print("[ERROR] Wrong usage of 'Helper.get_func_argument_info()'")
 
 
 def set_func_argument(func_tinfo, index, arg_tinfo):
@@ -206,10 +207,10 @@ def get_fields_at_offset(tinfo, offset):
                 elif not udt_member.type.is_udt():
                     result.append(udt_member.type)
             if udt_member.type.is_array():
-                if (offset - udt_member.offset / 8) % udt_member.type.get_array_element().get_size() == 0:
+                if (offset - udt_member.offset // 8) % udt_member.type.get_array_element().get_size() == 0:
                     result.append(udt_member.type.get_array_element())
             elif udt_member.type.is_udt():
-                result.extend(get_fields_at_offset(udt_member.type, offset - udt_member.offset / 8))
+                result.extend(get_fields_at_offset(udt_member.type, offset - udt_member.offset // 8))
             idx += 1
     return result
 
@@ -265,7 +266,7 @@ def get_funcs_calling_address(ea):
         if xref_func_ea != idaapi.BADADDR:
             xrefs.add(xref_func_ea)
         else:
-            print "[Warning] Function not found at 0x{0:08X}".format(xref_ea)
+            print("[Warning] Function not found at 0x{0:08X}".format(xref_ea))
         xref_ea = idaapi.get_next_cref_to(ea, xref_ea)
     return xrefs
 
@@ -326,7 +327,7 @@ def save_long_str_to_idb(array_name, value):
         idc.delete_array(id)
     id = idc.create_array(array_name)
     r = []
-    for idx in xrange(len(value) / 1024 + 1):
+    for idx in xrange(len(value) // 1024 + 1):
         s = value[idx * 1024: (idx + 1) * 1024]
         r.append(s)
         idc.set_array_string(id, idx, s)

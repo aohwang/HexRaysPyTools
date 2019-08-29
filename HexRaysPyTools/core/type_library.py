@@ -1,11 +1,12 @@
+from __future__ import print_function
+from six.moves import *
 import ctypes
 import sys
 
 import idaapi
 
-import const
+from . import const
 import HexRaysPyTools.forms as forms
-
 
 class til_t(ctypes.Structure):
     pass
@@ -27,7 +28,7 @@ def _enable_library_ordinals(library_num):
     elif sys.platform == "darwin":
         dll = ctypes.cdll["lib" + idaname + ".dylib"]
     else:
-        print "[ERROR] Failed to enable ordinals"
+        print("[ERROR] Failed to enable ordinals")
         return
 
     dll.get_idati.restype = ctypes.POINTER(til_t)
@@ -41,12 +42,12 @@ def choose_til():
     information about max ordinal and whether it's local or imported library """
     idati = idaapi.cvar.idati
     list_type_library = [(idati, idati.name, idati.desc)]
-    for idx in xrange(idaapi.cvar.idati.nbases):
+    for idx in range(idaapi.cvar.idati.nbases):
         type_library = idaapi.cvar.idati.base(idx)          # type: idaapi.til_t
         list_type_library.append((type_library, type_library.name, type_library.desc))
 
     library_chooser = forms.MyChoose(
-        list(map(lambda x: [x[1], x[2]], list_type_library)),
+        map(lambda x: [x[1], x[2]], list_type_library),
         "Select Library",
         [["Library", 10 | idaapi.Choose2.CHCOL_PLAIN], ["Description", 30 | idaapi.Choose2.CHCOL_PLAIN]],
         69
@@ -58,7 +59,7 @@ def choose_til():
         if max_ordinal == idaapi.BADORD:
             _enable_library_ordinals(library_num - 1)
             max_ordinal = idaapi.get_ordinal_qty(selected_library)
-        print "[DEBUG] Maximal ordinal of lib {0} = {1}".format(selected_library.name, max_ordinal)
+        print("[DEBUG] Maximal ordinal of lib {0} = {1}".format(selected_library.name, max_ordinal))
         return selected_library, max_ordinal, library_num == 0
 
 

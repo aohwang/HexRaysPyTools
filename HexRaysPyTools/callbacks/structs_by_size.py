@@ -1,9 +1,10 @@
+from __future__ import print_function
 import idaapi
+from six.moves import *
 
-import actions
+from . import actions
 import HexRaysPyTools.forms as forms
 import HexRaysPyTools.core.type_library as type_library
-
 
 def _choose_structure_by_size(size):
     result = type_library.choose_til()
@@ -11,7 +12,7 @@ def _choose_structure_by_size(size):
         selected_library, max_ordinal, is_local_type = result
         matched_types = []
         tinfo = idaapi.tinfo_t()
-        for ordinal in xrange(1, max_ordinal):
+        for ordinal in range(1, max_ordinal):
             tinfo.create_typedef(selected_library, ordinal)
             if tinfo.get_size() == size:
                 name = tinfo.dstr()
@@ -61,11 +62,11 @@ class GetStructureBySize(actions.HexRaysPopupAction):
 
             c_function = hx_view.cfunc
             number_formats = c_function.numforms    # type: idaapi.user_numforms_t
-            # print "(number) flags: {0:#010X}, type_name: {1}, opnum: {2}".format(
+            # print("(number) flags: {0:#010X}, type_name: {1}, opnum: {2}".format(
             #     number_format.flags,
             #     number_format.type_name,
             #     number_format.opnum
-            # )
+            # ))
             operand_locator = idaapi.operand_locator_t(ea, ord(operand_number) if operand_number else 0)
             if operand_locator in number_formats:
                 del number_formats[operand_locator]

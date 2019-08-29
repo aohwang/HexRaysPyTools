@@ -1,10 +1,10 @@
 import logging
+from six.moves import *
 
 import idaapi
 import idc
 
 logger = logging.getLogger(__name__)
-
 
 class LocalType:
     def __init__(self, name, members_ordinals, hint, is_selected=False, is_typedef=False, is_enum=False, is_union=False):

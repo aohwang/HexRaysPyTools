@@ -1,8 +1,9 @@
 import idaapi
 import idc
+from six.moves import *
 
-import actions
-import callbacks
+from . import actions
+from . import callbacks
 
 
 def inverse_if_condition(cif):
@@ -57,7 +58,7 @@ def invert(func_ea, if_ea):
         except KeyError:
             inverted.add(iv_rva)
 
-        idc.SetArrayString(internal_id, 0, " ".join(map(str, inverted)))
+        idc.SetArrayString(internal_id, 0, " ".join(list(map(str, inverted))))
 
 
 class SwapThenElse(actions.HexRaysPopupAction):
@@ -175,7 +176,7 @@ class SilentIfSwapper(callbacks.HexRaysEventHandler):
         cfunc, level_of_maturity = args
         if level_of_maturity == idaapi.CMAT_TRANS1 and has_inverted(cfunc.entry_ea):
             # Make RVA from VA of IF instructions that should be inverted
-            inverted = map(lambda n: n + idaapi.get_imagebase(), get_inverted(cfunc.entry_ea))
+            inverted = list(map(lambda n: n + idaapi.get_imagebase(), get_inverted(cfunc.entry_ea)))
             visitor = SwapThenElseVisitor(inverted)
             visitor.apply_to(cfunc.body, None)
         elif level_of_maturity == idaapi.CMAT_TRANS2:

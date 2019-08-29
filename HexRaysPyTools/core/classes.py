@@ -1,10 +1,12 @@
+from __future__ import print_function
+from six import iteritems, itervalues
+from six.moves import *
 from PyQt5 import QtCore, QtGui
 
 import idaapi
 
 import HexRaysPyTools.forms
-import helper
-
+from . import helper
 
 all_virtual_functions = {}      # name    -> VirtualMethod
 all_virtual_tables = {}         # ordinal -> VirtualTable
@@ -125,7 +127,7 @@ class VirtualMethod(object):
                     for parent in self.parents:
                         parent.modified = True
             else:
-                print "[Warning] function {0} probably have wrong type".format(self.name)
+                print("[Warning] function {0} probably have wrong type".format(self.name))
 
     def open_function(self):
         addresses = self.addresses
@@ -184,7 +186,7 @@ class VirtualTable(object):
                 for current_function, other_function in zip(self.virtual_functions, udt_data):
                     current_function.update(other_function.name, other_function.type)
             else:
-                print "[ERROR] Something have been modified in Local types. Please refresh this view"
+                print("[ERROR] Something have been modified in Local types. Please refresh this view")
 
     def update_local_type(self):
         if self.modified:
@@ -200,7 +202,7 @@ class VirtualTable(object):
                 final_tinfo.set_numbered_type(idaapi.cvar.idati, self.ordinal, idaapi.NTF_REPLACE, self.name)
                 self.modified = False
             else:
-                print "[ERROR] Something have been modified in Local types. Please refresh this view"
+                print("[ERROR] Something have been modified in Local types. Please refresh this view")
 
     def set_first_argument_type(self, class_name):
         for function in self.virtual_functions:
@@ -301,10 +303,10 @@ class Class(object):
                             if not possible_func_udt.type.is_funcptr():
                                 break
                         else:
-                            vtables[field_udt.offset / 8] = possible_vtable
+                            vtables[field_udt.offset // 8] = possible_vtable
         if vtables:
             class_ = Class(tinfo.dstr(), tinfo, ordinal)
-            for offset, vtable_tinfo in vtables.iteritems():
+            for offset, vtable_tinfo in iteritems(vtables):
                 vtables[offset] = VirtualTable.create(vtable_tinfo, class_)
             class_.vtables = vtables
             return class_
@@ -316,13 +318,13 @@ class Class(object):
                 if class_:
                     self.name = class_.name
                     self.modified = False
-                    for offset, vtable in class_.vtables.iteritems():
+                    for offset, vtable in iteritems(class_.vtables):
                         self.vtables[offset].update()
                 else:
                     # TODO: drop class
                     raise IndexError
         except IndexError:
-            print "[ERROR] Something have been modified in Local types. Please refresh this view"
+            print("[ERROR] Something have been modified in Local types. Please refresh this view")
 
     def update_local_type(self):
         if self.modified:
@@ -431,7 +433,7 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         for class_row, class_ in enumerate(classes):
             class_item = TreeItem(class_, class_row, None)
-            for vtable_row, vtable in class_.vtables.iteritems():
+            for vtable_row, vtable in iteritems(class_.vtables):
                 vtable_item = TreeItem(vtable, vtable_row, class_item)
                 vtable_item.children = [TreeItem(function, 0, vtable_item) for function in vtable.virtual_functions]
                 class_item.children.append(vtable_item)

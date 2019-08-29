@@ -1,5 +1,5 @@
 import idaapi
-import actions
+from . import actions
 import HexRaysPyTools.api as api
 import HexRaysPyTools.core.cache as cache
 import HexRaysPyTools.core.helper as helper
